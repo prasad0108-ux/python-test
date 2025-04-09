@@ -1,7 +1,5 @@
 from flask import Flask
+from app.routes import routes
 
 app = Flask(__name__)
-
-@app.route("/")
-def hello():
-    return "Hello from Flask app!"
+app.register_blueprint(routes)
