@@ -8,6 +8,16 @@ pipeline {
             }
         }
 
+        stage('Docker Login') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: 'docker-imp', url: '']) {
+                        // Authentication happens here
+                    }
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh 'make image'
@@ -29,7 +39,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'your-dockerhub-creds-id') {
+                    withDockerRegistry([credentialsId: 'your-dockerhub-creds-id', url: '']) {
                         sh 'make push'
                     }
                 }
