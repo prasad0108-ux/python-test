@@ -1,9 +1,45 @@
 pipeline {
     agent any
+
     stages {
-        stage('Hello') {
+        stage('Checkout') {
             steps {
-                echo 'Jenkinsfile is working!'
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'make image'
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate && \
+                    pip install --upgrade pip && \
+                    pip install -r requirements.txt && \
+                    export PYTHONPATH=$PWD && \
+                    pytest tests/
+                '''
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'your-dockerhub-creds-id') {
+                        sh 'make push'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy App') {
+            steps {
+                sh 'docker run -d --rm -p 5000:5000 prasads01/python-webapp:latest'
             }
         }
     }
